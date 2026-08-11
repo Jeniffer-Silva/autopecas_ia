@@ -20,7 +20,7 @@
 
 ###### Escopo
 
-1\. Consultar peças. 
+1\. Consultar peças.
 
 &#x09;Exemplo: "Tem pastilha de freio para Onix 2020?"
 
@@ -95,8 +95,7 @@ Segue colunas, tipo de dados e objetivo da coluna:
 ###### Teste 1: Peça encontrada
 
 * Pergunta: "Tem pastilha de freio para Onix 2020?"
-* Resposta esperada: "Peça encontrada - Preço - Quantidade disponível no estoque
-* "
+* Resposta esperada: "Peça encontrada - Preço - Quantidade disponível no estoque"
 
 
 

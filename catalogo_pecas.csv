@@ -1,0 +1,21 @@
+codigo,peca,marca,modelo,ano_inicio,ano_fim,preco,estoque
+P001,Pastilha de freio dianteira,Chevrolet,Onix,2019,2022,89.90,8
+P002,Filtro de oleo,Chevrolet,Onix,2019,2022,35.90,15
+P003,Filtro de ar,Chevrolet,Onix,2019,2022,42.50,10
+P004,Vela de ignicao,Chevrolet,Onix,2019,2022,29.90,20
+P005,Pastilha de freio dianteira,Toyota,Corolla,2018,2021,129.90,6
+P006,Filtro de oleo,Toyota,Corolla,2018,2021,39.90,12
+P007,Filtro de ar,Toyota,Corolla,2018,2021,55.90,9
+P008,Vela de ignicao,Toyota,Corolla,2018,2021,34.90,16
+P009,Pastilha de freio dianteira,Volkswagen,Gol,2019,2022,79.90,10
+P010,Filtro de oleo,Volkswagen,Gol,2019,2022,32.90,14
+P011,Filtro de ar,Volkswagen,Gol,2019,2022,38.90,7
+P012,Vela de ignicao,Volkswagen,Gol,2019,2022,27.90,18
+P013,Pastilha de freio dianteira,Hyundai,HB20,2020,2023,99.90,5
+P014,Filtro de oleo,Hyundai,HB20,2020,2023,36.90,11
+P015,Filtro de ar,Hyundai,HB20,2020,2023,45.90,8
+P016,Vela de ignicao,Hyundai,HB20,2020,2023,31.90,13
+P017,Pastilha de freio dianteira,Honda,Civic,2017,2021,119.90,4
+P018,Filtro de oleo,Honda,Civic,2017,2021,41.90,10
+P019,Filtro de ar,Honda,Civic,2017,2021,52.90,6
+P020,Vela de ignicao,Honda,Civic,2017,2021,33.90,15
