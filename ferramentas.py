@@ -1,6 +1,7 @@
 # importar biblioteca
 import csv
 import unicodedata
+from langchain.tools import tool
 
 # função para deixar o texto em minúscula e sem acentos
 def normalizar_texto(texto):
@@ -20,8 +21,12 @@ def normalizar_texto(texto):
 # guardar o nome do arquivo a ser consultado
 CAMINHO_CATALOGO = "catalogo_pecas.csv"
 
-# função para consultar o catálogo
-def consultar_catalogo(peca=None, marca=None,modelo=None,ano=None):
+# função para consultar o catálogo transformada em tool para o LangChain
+@tool
+def consultar_catalogo(peca=None, marca=None, modelo=None, ano=None):
+    # inserir docstring para o LangChain
+    """Consulta o catálogo de autopeças por peça, marca, modelo e ano."""
+
     # criar lista de resultados
     resultados = []
 
@@ -46,11 +51,11 @@ def consultar_catalogo(peca=None, marca=None,modelo=None,ano=None):
 
             # se o usuário informar o ano, transformar o ano em inteiro
             if ano:
-                ano = int(ano)
+                ano_pesquisado = int(ano)
 
                 # verificar se o ano pesquisado está dentro do intervalo de compatibilidade da peça
                 if not (
-                    int(item["ano_inicio"]) <= ano <= int(item["ano_fim"])
+                    int(item["ano_inicio"]) <= ano_pesquisado <= int(item["ano_fim"])
                 ):
                     continue
 
