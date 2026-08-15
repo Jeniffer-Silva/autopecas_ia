@@ -1,4 +1,5 @@
 import json
+import re
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from ferramentas import consultar_catalogo
@@ -16,33 +17,40 @@ modelo = ChatOpenAI(
 st.title("🚗 Assistente de Autopeças")
 st.write("Digite sua dúvida sobre uma peça e eu consultarei o catálogo.")
 
-pergunta = st.text_input("Digite sua pergunta: ")
+pergunta = st.text_area("Digite sua pergunta: ", height=120)
+st.caption("ℹ️ Máximo de 250 caracteres.")
 
 # preparar guardrail
-TERMOS_AUTOPECAS = [
-    "peça",
-    "peca",
-    "filtro",
-    "pastilha",
-    "freio",
-    "óleo",
-    "oleo",
-    "motor",
-    "vela",
-    "bateria",
-    "pneu",
-    "amortecedor",
-    "embreagem",
-    "radiador",
-    "carro",
-    "veículo",
-    "veiculo",
-] 
+TERMOS_AUTOPECAS = ["peça","peca","filtro","pastilha","freio","óleo","oleo","motor","vela","bateria","pneu","amortecedor","embreagem","radiador","carro","veículo","veiculo"]
 
 # fazer a LLM entender a pergunta
 if st.button("Consultar"):
-    if pergunta:
+    if not pergunta:
+        st.warning("Digite uma pergunta antes de consultar.")
+
+    elif len(pergunta) > 250:
+        st.warning("Sua pergunta é muito longa. Digite uma dúvida com até 250 caracteres.")
+
+    else:
         pergunta_normalizada = pergunta.lower()
+
+        # verificar se o usuário escreveu o ano por extenso
+        if re.search(r"\b(?:mil novecentos|dois mil)\b", pergunta_normalizada):
+            st.warning(
+                "Para evitar interpretações incorretas, informe o ano com quatro dígitos, por exemplo, 2020."
+            )
+            st.stop()
+
+        # identificar um possível ano informado pelo usuário
+        anos_encontrados = re.findall(r"\b\d{4}\b", pergunta)
+
+        # validar o ano original antes de enviar a pergunta para a LLM
+        if anos_encontrados:
+            ano_informado = int(anos_encontrados[0])
+
+            if ano_informado < 1900 or ano_informado > 2100:
+                st.warning("O ano informado está fora de um intervalo válido.")
+                st.stop()
 
         if not any(termo in pergunta_normalizada for termo in TERMOS_AUTOPECAS):
             st.warning("Posso ajudar apenas com consultas sobre autopeças e veículos.")
@@ -86,19 +94,74 @@ if st.button("Consultar"):
                 conteudo = conteudo.removeprefix("```json").removesuffix("```").strip()
 
             # transformar o JSON em dicionário Python
-            dados = json.loads(conteudo)
+            try:
+                dados = json.loads(conteudo)
+            except json.JSONDecodeError:
+                st.error(
+                    "Não foi possível processar a resposta. "
+                    "Tente reformular sua pergunta."
+                )
+                st.stop()
 
-            # converter o ano para inteiro
+            # verificar se a resposta é um objeto JSON
+            if not isinstance(dados, dict):
+                st.error(
+                    "Formato inesperado. "
+                    "Tente reformular sua pergunta."
+                )
+                st.stop()
+
+            # verificar se todos os campos esperados estão presentes
+            campos_obrigatorios = ["peca", "marca", "modelo", "ano"]
+
+            if not all(campo in dados for campo in campos_obrigatorios):
+                st.error(
+                    "A IA não conseguiu identificar corretamente os dados da pergunta. "
+                    "Tente informar a peça, marca, modelo e ano."
+                )
+                st.stop()
+
+            # validar se a peça foi identificada
+            if not dados["peca"] or not str(dados["peca"]).strip():
+                st.warning(
+                    "Não consegui identificar qual peça você procura. "
+                    "Tente informar o nome da peça."
+                )
+                st.stop()
+
+            # validar e preservar o ano informado originalmente pelo usuário
             if dados["ano"] is not None:
-                dados["ano"] = int(dados["ano"])
+                try:
+                    dados["ano"] = int(dados["ano"])
+                except (ValueError, TypeError):
+                    st.warning("O ano informado não é válido. Informe um ano numérico.")
+                    st.stop()
+
+                if dados["ano"] < 1900 or dados["ano"] > 2100:
+                    st.warning("O ano informado está fora de um intervalo válido.")
+                    st.stop()
+
+            # se o usuário informou um ano, usar o valor original informado por ele
+            if anos_encontrados:
+                dados["ano"] = ano_informado
 
             # executar a Tool do LangChain
-            resultado = consultar_catalogo.invoke({
-                "peca": dados["peca"],
-                "marca": dados["marca"],
-                "modelo": dados["modelo"],
-                "ano": dados["ano"]
-            })
+            try:
+                resultado = consultar_catalogo.invoke({
+                    "peca": dados["peca"],
+                    "marca": dados["marca"],
+                    "modelo": dados["modelo"],
+                    "ano": dados["ano"]
+                })
+            except ValueError as erro:
+                st.warning(str(erro))
+                st.stop()
+            except FileNotFoundError as erro:
+                st.error(str(erro))
+                st.stop()
+            except Exception:
+                st.error("Ocorreu um erro ao consultar o catálogo. Tente novamente.")
+                st.stop()
 
             # criar um prompt para transformar o resultado em uma resposta amigável
             prompt_resposta = ChatPromptTemplate.from_template("""
@@ -133,8 +196,5 @@ if st.button("Consultar"):
                 )
             )
 
-            st.subheader("🤖 Resposta do assistente:")
+            st.subheader("Resposta do assistente:")
             st.write(resposta_final.content)
-
-    else:
-        st.warning("Digite uma pergunta antes de consultar.")

@@ -24,43 +24,59 @@ CAMINHO_CATALOGO = "catalogo_pecas.csv"
 # função para consultar o catálogo transformada em tool para o LangChain
 @tool
 def consultar_catalogo(peca=None, marca=None, modelo=None, ano=None):
-    # inserir docstring para o LangChain
     """Consulta o catálogo de autopeças por peça, marca, modelo e ano."""
+
+    # validar o ano antes de consultar o catálogo
+    if ano is not None:
+        try:
+            ano = int(ano)
+        except (ValueError, TypeError):
+            raise ValueError("O ano informado deve ser numérico.")
+
+        if ano < 1900 or ano > 2100:
+            raise ValueError("O ano informado está fora de um intervalo válido.")
 
     # criar lista de resultados
     resultados = []
 
-    # abrrir o CSV
-    with open(CAMINHO_CATALOGO, mode="r", encoding="utf-8") as arquivo:
-        # função que trata cada linha do CSV como um dicionário
-        leitor = csv.DictReader(arquivo)
+    try:
+        # abrir o CSV
+        with open(CAMINHO_CATALOGO, mode="r", encoding="utf-8") as arquivo:
+            leitor = csv.DictReader(arquivo)
 
-        # percorrer cada peça
-        for item in leitor:
-            # verificar se o texto pesquisado está dentro do nome da peça
-            if peca and normalizar_texto(peca) not in normalizar_texto(item["peca"]):
-                continue
+            # percorrer cada peça
+            for item in leitor:
 
-            # verificar se a marca informada é diferente da marca da peça
-            if marca and normalizar_texto(marca) != normalizar_texto(item["marca"]):
-                continue
-
-            # verificar se o modelo informado é diferente do modelo da peça
-            if modelo and normalizar_texto(modelo) != normalizar_texto(item["modelo"]):
-                continue
-
-            # se o usuário informar o ano, transformar o ano em inteiro
-            if ano:
-                ano_pesquisado = int(ano)
-
-                # verificar se o ano pesquisado está dentro do intervalo de compatibilidade da peça
-                if not (
-                    int(item["ano_inicio"]) <= ano_pesquisado <= int(item["ano_fim"])
-                ):
+                # verificar se o texto pesquisado está dentro do nome da peça
+                if peca and normalizar_texto(peca) not in normalizar_texto(item["peca"]):
                     continue
 
-            # adicionar o a peça que passou pelas verificações ao final da lista
-            resultados.append(item)
+                # verificar a marca
+                if marca and normalizar_texto(marca) != normalizar_texto(item["marca"]):
+                    continue
 
-    # retornar com as peças encontradas
+                # verificar o modelo
+                if modelo and normalizar_texto(modelo) != normalizar_texto(item["modelo"]):
+                    continue
+
+                # verificar o ano
+                if ano is not None:
+                    if not (
+                        int(item["ano_inicio"]) <= ano <= int(item["ano_fim"])
+                    ):
+                        continue
+
+                # adicionar o item encontrado
+                resultados.append(item)
+
+    except FileNotFoundError:
+        raise FileNotFoundError(
+            "O arquivo catalogo_pecas.csv não foi encontrado."
+        )
+
+    except (KeyError, ValueError):
+        raise ValueError(
+            "O catálogo possui dados inválidos ou está em formato inesperado."
+        )
+
     return resultados
