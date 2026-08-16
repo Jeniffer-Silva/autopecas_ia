@@ -180,7 +180,7 @@ A aplicação valida a entrada antes de realizar a consulta.
 
 ## 🏗️ Arquitetura
 
-![Arquitetura do projeto](arquitetura.png)
+![Arquitetura do projeto](desenho_arquitetura.png)
 
 ### Principais componentes
 
