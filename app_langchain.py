@@ -5,11 +5,11 @@ from langchain_openai import ChatOpenAI
 from ferramentas import consultar_catalogo
 import streamlit as st
 
-# conectar o LangChain ao servidor local do LM Studio
+# conectar o LangChain à API do Google Gemini
 modelo = ChatOpenAI(
-    model="google/gemma-3-1b",
-    base_url="http://localhost:1234/v1",
-    api_key="lm-studio",
+    model="gemini-3.1-flash-lite",
+    base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+    api_key=st.secrets["GOOGLE_API_KEY"],
     temperature=0
 )
 
