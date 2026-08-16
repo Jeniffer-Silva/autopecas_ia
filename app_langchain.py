@@ -21,7 +21,7 @@ pergunta = st.text_area("Digite sua pergunta: ", height=120)
 st.caption("ℹ️ Máximo de 250 caracteres.")
 
 # preparar guardrail
-TERMOS_AUTOPECAS = ["peça","peca","filtro","pastilha","freio","óleo","oleo","motor","vela","bateria","pneu","amortecedor","embreagem","radiador","carro","veículo","veiculo"]
+TERMOS_AUTOPECAS = ["peça","peca","filtro","pastilha","freio","óleo","oleo","motor","vela","bateria","pneu","amortecedor","embreagem","radiador","carro","veículo","veiculo", "bomba", "combustível", "combustivel"]
 
 # fazer a LLM entender a pergunta
 if st.button("Consultar"):
